@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDateTime;
 import java.util.Iterator;
 
 
@@ -39,7 +40,14 @@ public class OrderController {
         CartEntity cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
 
+        if (cart.getProducts().isEmpty()) {
+            // Nothing to purchase, so leave the empty cart available to the customer.
+            return "redirect:/cart";
+        }
+
         OrderEntity order = new OrderEntity();
+        // Record the purchase time for the order confirmation.
+        order.setOrderDate(LocalDateTime.now());
         double total = 0.0;
         Iterator<ProductEntity> iterator = cart.getProducts().iterator();
 
@@ -60,10 +68,12 @@ public class OrderController {
         order.setTotalAmount(total);
         orderRepository.save(order);
 
+        // The saved order preserves the purchase; clear the cart for the next visit.
+        cart.getProducts().clear();
         cartRepository.save(cart);
 
-        model.addAttribute("order", order);
-        return "redirect:/order/" + order.getId();
+        // A redirect starts a new request, so use the saved ID to load this order's details.
+        return "redirect:/orders/" + order.getId();
     }
 
     @GetMapping("/{orderId}")

@@ -13,9 +13,13 @@
 
 <h2>Items Purchased</h2>
 
+<!-- Publications have titles; tickets use descriptions, so render the right label for each. -->
 <ul>
     <li th:each="product : ${order.products}">
-        <span th:text="${product.name}"></span>
+        <span th:if="${product instanceof T(csd230.lab1.entities.PublicationEntity)}"
+              th:text="${product.title}"></span>
+        <span th:if="${product instanceof T(csd230.lab1.entities.TicketEntity)}"
+              th:text="${product.description}"></span>
         — $<span th:text="${product.price}"></span>
     </li>
 </ul>
