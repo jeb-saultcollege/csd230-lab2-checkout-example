@@ -8,8 +8,18 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@Entity @DiscriminatorValue("ORDER")
-public class OrderEntity extends PublicationEntity {
+/**
+ * An order is a purchase record, not a publication, so it has its own entity and ID.
+ * The default entity-to-table mapping is enough; an explicit table annotation is not needed.
+ */
+@Entity
+public class OrderEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    // Long can stay null until Hibernate fills in the generated ID during save.
+    private Long id;
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
@@ -20,32 +30,21 @@ public class OrderEntity extends PublicationEntity {
 
     private Set<ProductEntity> products = new LinkedHashSet<>();
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private long id;
     private double totalAmount;
     private LocalDateTime orderDate;
 
 
-
     public OrderEntity() {
-    }
-
-    public OrderEntity(String t, double p, int c) {
-        super(t, p, c);
     }
 
     public Set<ProductEntity> getProducts() {
         return products;
     }
 
-    @Override
     public Long getId() {
         return id;
     }
 
-    @Override
     public void setId(Long id) {
         this.id = id;
     }
@@ -66,20 +65,21 @@ public class OrderEntity extends PublicationEntity {
         this.orderDate = orderDate;
     }
 
+    // Equality now compares order data only; this entity no longer inherits publication fields.
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
         OrderEntity that = (OrderEntity) o;
-        return id == that.id && Double.compare(totalAmount, that.totalAmount) == 0 && Objects.equals(products, that.products) && Objects.equals(orderDate, that.orderDate);
+        return Objects.equals(id, that.id) && Double.compare(totalAmount, that.totalAmount) == 0 && Objects.equals(products, that.products) && Objects.equals(orderDate, that.orderDate);
     }
 
+    // Keep the diagnostic text focused on order fields, not publication details.
     @Override
     public String toString() {
         return "OrderEntity{" +
                 "id=" + id +
                 ", totalAmount=" + totalAmount +
                 ", orderDate=" + orderDate +
-                "} " + super.toString();
+                '}';
     }
 }

@@ -22,12 +22,9 @@ public class CartController {
     public String viewCart(Model model) {
         Long defaultCartId = 1L;
 
+        // Application creates this generated-ID cart at startup; don't assign its ID by hand here.
         CartEntity cart = cartRepository.findById(defaultCartId)
-                .orElseGet(() -> {
-                    CartEntity newCart = new CartEntity();
-                    newCart.setId(defaultCartId);
-                    return cartRepository.save(newCart);
-                });
+                .orElseThrow(() -> new IllegalStateException("Default cart 1 was not initialized"));
         model.addAttribute("cart", cart);
         return "cartView";
     }

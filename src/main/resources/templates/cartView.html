@@ -48,7 +48,8 @@
 <br/>
 <p>
     <a th:href="@{/books}">Continue Shopping</a>
-    <a th:href="@{/checkout/cartId}">Checkout</a>
+    <!-- Use the controller's route and pass this cart's actual ID. -->
+    <a th:href="@{/orders/checkout/{id}(id=${cart.id})}">Checkout</a>
 </p>
 
 </body>
